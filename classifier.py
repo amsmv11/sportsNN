@@ -1,6 +1,37 @@
 import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense
+from time import sleep
+
+
+#FUNCOES AUX
+def transform_results(dataFrame):
+    resultsHome = []
+    resultsTie = []
+    resultsAway = []
+    for e in dataFrame:
+        if e == 'H':
+            resultsHome += [1]
+            resultsTie += [0]
+            resultsAway += [0]
+        elif e == 'A':
+            resultsHome += [0]
+            resultsTie += [0]
+            resultsAway += [1]
+        else:
+            resultsHome += [0]
+            resultsTie += [1]
+            resultsAway += [0]
+    df = pd.DataFrame(list(zip(resultsHome,resultsTie, resultsAway)))
+    return df
+#FUNCOES AUX
+
+
+
+
+
+
+
 
 #importar os dataframes 
 # X_train = pd.read_csv("./breast_cancer_examples/xtrain.csv", header=None)  #X=inputs
@@ -15,10 +46,25 @@ ligaNOS2019Results = ligaNOS2019["FTR"]  #full time Result   H-home D-draw A-awa
 ligaNOS2020Results = ligaNOS2020["FTR"]  
 
 
+#transforming H,D,H to 1 0 0(Home)  0 1 0(Draw)  0 0 1(Away)
+ligaNOS2019Results = transform_results(ligaNOS2019Results) 
+ligaNOS2020Results = transform_results(ligaNOS2020Results)  
+
+
 
 ligaNOS2019.drop("FTR", axis=1, inplace=True)
-ligaNOS2020.drop("FTR", axis=1, inplace=True)
+ligaNOS2019.drop("HTR", axis=1, inplace=True)
+ligaNOS2019.drop("Div", axis=1, inplace=True)
+ligaNOS2019.drop("Date", axis=1, inplace=True)
+ligaNOS2019.drop("HomeTeam", axis=1, inplace=True)
+ligaNOS2019.drop("AwayTeam", axis=1, inplace=True)
 
+ligaNOS2020.drop("FTR", axis=1, inplace=True)
+ligaNOS2020.drop("HTR", axis=1, inplace=True)
+ligaNOS2020.drop("Div", axis=1, inplace=True)
+ligaNOS2020.drop("Date", axis=1, inplace=True)
+ligaNOS2020.drop("HomeTeam", axis=1, inplace=True)
+ligaNOS2020.drop("AwayTeam", axis=1, inplace=True)
 
 #initialize the ANN
 classifier = Sequential()
@@ -31,7 +77,10 @@ classifier.add(Dense(units = 3, activation="sigmoid"))  #sigmoid vai obrigar a d
 classifier.compile(optimizer = "rmsprop", loss = "binary_crossentropy")
 
 #training
-classifier.fit(X_train, Y_train, batch_size = 1, epochs = 100)
+classifier.fit(ligaNOS2019, ligaNOS2019Results, batch_size = 1, epochs = 250)
+# classifier.fit(X_train, Y_train, batch_size = 1, epochs = 100)
+
+sleep(1000)
 
 #predicting
 Y_pred = classifier.predict(X_test)
@@ -55,9 +104,4 @@ print("Accuracy: " + str(correct/total))
 
 
 
-#FUNCOES AUX
-# def transform_results(dataFrame):
-#     resultsHome = []
-#     resultsTie = []
-#     resultsAway = []
-#     for e in dataFrame:
+
